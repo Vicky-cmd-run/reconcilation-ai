@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Custom Properties ──────────────────────────────── */
+:root {
+  --aurora-cyan: rgba(34, 211, 238, 0.06);
+  --aurora-violet: rgba(167, 139, 250, 0.06);
+  --aurora-fuchsia: rgba(232, 121, 249, 0.05);
+  --glow-fuchsia: rgba(217, 70, 239, 0.35);
+  --glow-cyan: rgba(34, 211, 238, 0.35);
+  --glow-emerald: rgba(52, 211, 153, 0.35);
+}
+
+/* ─── Base ───────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply antialiased text-slate-100;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #05050a;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 10% 0%,   var(--aurora-violet)  0, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 90% 5%,   var(--aurora-cyan)    0, transparent 55%),
+      radial-gradient(ellipse 60% 50% at 50% 100%,  var(--aurora-fuchsia) 0, transparent 65%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  /* Animated aurora overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 35% 30% at 20% 30%, rgba(139, 92, 246, 0.04) 0, transparent 60%),
+      radial-gradient(ellipse 25% 25% at 80% 60%, rgba(34, 211, 238, 0.04) 0, transparent 55%);
+    pointer-events: none;
+    z-index: 0;
+    animation: aurora-drift 20s ease-in-out infinite alternate;
+  }
+
+  @keyframes aurora-drift {
+    0%   { opacity: 0.6; transform: scale(1.0) translate(0, 0); }
+    50%  { opacity: 1.0; transform: scale(1.05) translate(10px, -15px); }
+    100% { opacity: 0.7; transform: scale(1.02) translate(-8px, 10px); }
+  }
+
+  /* Monospace for IDs */
+  code, kbd, pre, .font-mono {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+}
+
+/* ─── Components ─────────────────────────────────────── */
+@layer components {
+
+  /* Glass panel variants */
+  .glass-panel {
+    @apply bg-white/[0.04] border border-white/[0.07] backdrop-blur-xl shadow-xl rounded-2xl;
+    background-image: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+  }
+
+  .glass-panel-sm {
+    @apply bg-white/[0.05] border border-white/[0.08] backdrop-blur-md shadow-lg rounded-xl;
+  }
+
+  .glass-panel-dark {
+    @apply bg-slate-950/60 border border-white/[0.05] backdrop-blur-xl shadow-2xl rounded-2xl;
+  }
+
+  /* Severity badge */
+  .badge-high   { @apply px-2.5 py-0.5 rounded-full text-xs font-bold border bg-red-500/10 text-red-400 border-red-500/20; }
+  .badge-medium { @apply px-2.5 py-0.5 rounded-full text-xs font-bold border bg-amber-500/10 text-amber-400 border-amber-500/20; }
+  .badge-low    { @apply px-2.5 py-0.5 rounded-full text-xs font-bold border bg-emerald-500/10 text-emerald-400 border-emerald-500/20; }
+
+  /* Glow button */
+  .btn-glow {
+    @apply relative px-7 py-3.5 rounded-xl font-bold tracking-wide transition-all duration-300 overflow-hidden;
+    background: linear-gradient(135deg, #6d28d9 0%, #a21caf 100%);
+    box-shadow: 0 0 0 0 var(--glow-fuchsia);
+  }
+  .btn-glow:hover:not(:disabled) {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 8px 30px -4px var(--glow-fuchsia);
+  }
+  .btn-glow:disabled {
+    @apply opacity-40 cursor-not-allowed;
+  }
+
+  /* Stat card hover glow */
+  .metric-card-glow {
+    transition: box-shadow 0.3s ease, transform 0.25s ease;
+  }
+  .metric-card-glow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px -8px rgba(139, 92, 246, 0.25);
+  }
+
+  /* Table row hover */
+  .table-row-hover {
+    @apply transition-colors duration-150;
+  }
+  .table-row-hover:hover {
+    background: rgba(255,255,255,0.04);
+  }
+
+  /* Input field */
+  .input-field {
+    @apply bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-slate-200 
+           placeholder-slate-500 focus:outline-none focus:border-fuchsia-500/50 
+           focus:ring-1 focus:ring-fuchsia-500/30 transition-all duration-200;
+  }
+}
+
+/* ─── Utilities ──────────────────────────────────────── */
+@layer utilities {
+
+  /* Custom scrollbar */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar       { width: 5px; height: 5px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.3);
+    border-radius: 999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.55);
+  }
+
+  /* Gradient text shorthands */
+  .gradient-fuchsia {
+    @apply bg-gradient-to-r from-fuchsia-400 to-indigo-400 bg-clip-text text-transparent;
+  }
+  .gradient-emerald {
+    @apply bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent;
+  }
+  .gradient-amber {
+    @apply bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent;
+  }
+
+  /* Glow text */
+  .text-glow-fuchsia { text-shadow: 0 0 18px rgba(217, 70, 239, 0.6); }
+  .text-glow-cyan    { text-shadow: 0 0 18px rgba(34, 211, 238, 0.6); }
+
+  /* Shimmer loading skeleton */
+  .shimmer {
+    background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* Pulse dot indicator */
+  .pulse-dot {
+    @apply w-2 h-2 rounded-full bg-emerald-400;
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
+    animation: pulse-ring 2s ease-out infinite;
+  }
+  @keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+    70%  { box-shadow: 0 0 0 7px rgba(52, 211, 153, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+  }
+
+  /* Selection */
+  ::selection {
+    background: rgba(167, 139, 250, 0.35);
+    color: white;
+  }
+}
