@@ -14,7 +14,7 @@ import {
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { reconciliationApi } from './utils/api';
-import { useToast, ToastContainer, type ToastType } from './components/Toast';
+import { useToast, ToastContainer } from './components/Toast';
 import './App.css';
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
@@ -853,8 +853,8 @@ export default function App() {
         setIsDemoMode(false);
         setActiveTab('dashboard');
         addToast(res.message || 'Analysis complete!', 'success');
-        if (res.statistics?.total_mismatches > 0) {
-          addToast(`${res.statistics.total_mismatches} mismatches · ₹${res.statistics.total_discrepancy_value?.toLocaleString()} at risk`, 'info');
+        if ((res.statistics?.total_mismatches ?? 0) > 0) {
+          addToast(`${res.statistics!.total_mismatches} mismatches · ₹${res.statistics!.total_discrepancy_value?.toLocaleString() ?? 0} at risk`, 'info');
         }
       } else {
         addToast('Reconciliation completed with issues.', 'warning');
