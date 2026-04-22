@@ -1,6 +1,6 @@
 """
 AI-powered mismatch analyzer with caching, retry logic, and async support.
-Uses Google Gemini API with fallback mechanisms for production reliability.
+Uses Google Gemini API (google-genai SDK) with fallback mechanisms for production reliability.
 """
 import json
 import hashlib
@@ -10,7 +10,6 @@ import logging
 from typing import Dict, Any, Optional
 
 import pandas as pd
-import google.generativeai as genai
 from cachetools import TTLCache
 
 from config import get_settings
@@ -20,24 +19,18 @@ logger = logging.getLogger(__name__)
 # Initialize settings
 settings = get_settings()
 
-# Configure Gemini API
+# Configure Gemini client using the new google-genai SDK
+_client = None
 if settings.is_api_key_configured():
-    genai.configure(api_key=settings.GEMINI_API_KEY)
-    generation_config = {
-        "temperature": settings.LLM_TEMPERATURE,
-        "response_mime_type": "application/json",
-    }
     try:
-        model = genai.GenerativeModel(
-            model_name=settings.GEMINI_MODEL,
-            generation_config=generation_config,
-        )
+        from google import genai
+        _client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        logger.info("Gemini client initialized with google-genai SDK")
     except Exception as e:
-        logger.error(f"Failed to initialize Gemini model: {e}")
-        model = None
+        logger.error(f"Failed to initialize Gemini client: {e}")
+        _client = None
 else:
     logger.warning("Gemini API key not configured. Using fallback analysis.")
-    model = None
 
 # Response cache: key -> (response, timestamp)
 # Using TTLCache for automatic expiration
@@ -143,19 +136,18 @@ async def analyze_mismatch_async(mismatch_data: Dict[str, Any]) -> Dict[str, Any
     Returns:
         Analysis result with issue_type, severity, reason, suggested_action, explanation, confidence
     """
-    import pandas as pd  # noqa: F401 - Import for fallback analysis type hints
+    cache_key = _generate_cache_key(mismatch_data)
 
     # Check cache first
     if _response_cache is not None:
-        cache_key = _generate_cache_key(mismatch_data)
         if cache_key in _response_cache:
             logger.debug(f"Cache hit for invoice {mismatch_data.get('invoice_id')}")
             cached_result = _response_cache[cache_key].copy()
             cached_result['cached'] = True
             return cached_result
 
-    # If model not available, use fallback
-    if model is None or not settings.is_api_key_configured():
+    # If client not available, use fallback
+    if _client is None or not settings.is_api_key_configured():
         logger.debug(f"Using fallback analysis for invoice {mismatch_data.get('invoice_id')}")
         result = _fallback_analysis(mismatch_data)
         result['cached'] = False
@@ -197,9 +189,14 @@ Output strictly in JSON format with exactly these keys:
     last_error = None
     for attempt in range(settings.LLM_MAX_RETRIES + 1):
         try:
-            response = await model.generate_content_async(
-                prompt,
-                request_options={"timeout": settings.LLM_TIMEOUT_SECONDS * 1000}
+            from google import genai
+            response = _client.models.generate_content(
+                model=settings.GEMINI_MODEL,
+                contents=prompt,
+                config=genai.types.GenerateContentConfig(
+                    temperature=settings.LLM_TEMPERATURE,
+                    response_mime_type="application/json",
+                ),
             )
 
             result = _parse_llm_response(response.text)

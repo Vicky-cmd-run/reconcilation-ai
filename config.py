@@ -38,7 +38,7 @@ class Settings(BaseSettings):
 
     # LLM settings
     GEMINI_API_KEY: Optional[str] = Field(default=None, description="Google Gemini API key")
-    GEMINI_MODEL: str = Field(default="gemini-1.5-flash", description="Gemini model to use")
+    GEMINI_MODEL: str = Field(default="gemini-2.0-flash", description="Gemini model to use")
     LLM_TEMPERATURE: float = Field(default=0.1, ge=0.0, le=1.0, description="LLM temperature")
     LLM_TIMEOUT_SECONDS: int = Field(default=30, ge=5, le=120, description="LLM API timeout")
     LLM_MAX_RETRIES: int = Field(default=3, ge=0, le=5, description="Max LLM API retries")

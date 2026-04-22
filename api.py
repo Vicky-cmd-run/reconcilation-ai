@@ -211,21 +211,22 @@ async def reconcile_files(
                 detail=f"{name.capitalize()} file must be a CSV file"
             )
 
-        # Check file size
-        file.seek(0, 2)
-        file_size = file.tell()
-        file.seek(0)
-
-        if file_size > settings.max_file_size_bytes:
-            raise HTTPException(
-                status_code=status.HTTP_413_PAYLOAD_TOO_LARGE,
-                detail=f"{name.capitalize()} file exceeds maximum size of {settings.MAX_FILE_SIZE_MB}MB"
-            )
-
     try:
-        # Read files into pandas
+        # Read files into pandas (size check done after reading)
         company_content = await company_file.read()
         customer_content = await customer_file.read()
+
+        # Check file size after reading
+        if len(company_content) > settings.max_file_size_bytes:
+            raise HTTPException(
+                status_code=status.HTTP_413_PAYLOAD_TOO_LARGE,
+                detail=f"Company file exceeds maximum size of {settings.MAX_FILE_SIZE_MB}MB"
+            )
+        if len(customer_content) > settings.max_file_size_bytes:
+            raise HTTPException(
+                status_code=status.HTTP_413_PAYLOAD_TOO_LARGE,
+                detail=f"Customer file exceeds maximum size of {settings.MAX_FILE_SIZE_MB}MB"
+            )
 
         company_df = pd.read_csv(io.BytesIO(company_content))
         customer_df = pd.read_csv(io.BytesIO(customer_content))

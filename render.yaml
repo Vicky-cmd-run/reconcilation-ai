@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: nexus-ai-reconciliation-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false          # Set manually in Render dashboard — never commit this
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash
+      - key: DEBUG
+        value: "false"
+      - key: LOG_LEVEL
+        value: INFO
+      - key: LLM_CACHE_ENABLED
+        value: "true"
+      - key: LLM_CACHE_SIZE
+        value: "1000"
+      - key: ALLOWED_ORIGINS
+        value: "https://nexus-ai-reconciliation.vercel.app"
+      - key: RATE_LIMIT_ENABLED
+        value: "true"
+      - key: RATE_LIMIT_REQUESTS
+        value: "100"
