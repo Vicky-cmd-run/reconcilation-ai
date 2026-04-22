@@ -19,7 +19,7 @@ services:
       - key: LLM_CACHE_SIZE
         value: "1000"
       - key: ALLOWED_ORIGINS
-        value: "https://nexus-ai-reconciliation.vercel.app"
+        value: "https://reconcilation-ai.vercel.app"
       - key: RATE_LIMIT_ENABLED
         value: "true"
       - key: RATE_LIMIT_REQUESTS
